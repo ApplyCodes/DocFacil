@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DocFácil – Contratos, Recibos e Orçamentos Grátis</title>
+<style>
+:root{--fundo:#f7f6f2;--cartao:#fff;--texto:#1d2a24;--suave:#66736c;--cor:#0f7a56;--cor-clara:#e3f3ec;--borda:#e2e0d8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--fundo:#121816;--cartao:#1b2420;--texto:#eef2ef;--suave:#9aa9a1;--cor:#34c58f;--cor-clara:#17342a;--borda:#2b3832}}
+:root[data-theme="dark"]{--fundo:#121816;--cartao:#1b2420;--texto:#eef2ef;--suave:#9aa9a1;--cor:#34c58f;--cor-clara:#17342a;--borda:#2b3832}
+*{box-sizing:border-box}body{margin:0;background:var(--fundo);color:var(--texto);font:16px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;max-width:960px;margin:auto}
+.marca{font-weight:800;font-size:20px;color:var(--cor)}main{max-width:960px;margin:auto;padding:0 20px 40px}
+h1{font-size:clamp(26px,5vw,40px);line-height:1.15;margin:20px 0 8px}p.subtitulo{color:var(--suave);margin:0 0 24px}
+.anuncio{border:1px dashed var(--borda);color:var(--suave);font-size:12px;text-align:center;padding:18px;border-radius:10px;margin:18px 0}
+.grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.cartao{background:var(--cartao);border:1px solid var(--borda);border-radius:14px;padding:18px;cursor:pointer;text-align:left;color:var(--texto);font:inherit}
+.cartao:hover,.cartao.ativo{border-color:var(--cor);background:var(--cor-clara)}.cartao b{display:block;font-size:18px}.cartao span{color:var(--suave);font-size:14px}
+.fichas{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}.ficha{border:1px solid var(--borda);background:var(--cartao);color:var(--texto);border-radius:99px;padding:6px 14px;cursor:pointer;font:inherit;font-size:14px}.ficha.ativo{background:var(--cor);color:#fff;border-color:var(--cor)}
+.caixa{background:var(--cartao);border:1px solid var(--borda);border-radius:16px;padding:18px}
+label{display:block;font-size:13px;color:var(--suave);margin:10px 0 4px}
+input,textarea{width:100%;padding:10px 12px;border:1px solid var(--borda);border-radius:10px;background:var(--fundo);color:var(--texto);font:inherit}
+textarea{min-height:110px;resize:vertical}.linha{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+button.btnPrincipal{background:var(--cor);color:#fff;border:0;border-radius:12px;padding:13px 22px;font:inherit;font-weight:700;cursor:pointer;margin-top:16px}
+button.btnPrincipal:disabled{opacity:.5}button.btnSecundario{background:none;border:1px solid var(--borda);color:var(--texto);border-radius:10px;padding:8px 14px;cursor:pointer;font:inherit}
+.aviso{background:var(--cor-clara);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
+#documento{background:#fff;color:#111;border:1px solid var(--borda);border-radius:6px;padding:28px;margin-top:14px;font:15px/1.6 Georgia,serif;overflow-x:auto;white-space:pre-wrap}
+#documento img{max-height:70px;display:block;margin-bottom:12px}.oculto{display:none !important}
+#modalTermos{position:fixed;inset:0;z-index:99;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px}
+#modalTermos .modal{background:var(--cartao);color:var(--texto);border-radius:16px;max-width:620px;width:100%;max-height:90%;display:flex;flex-direction:column;padding:20px}
+#modalTermos .termos{overflow-y:auto;font-size:14px;border:1px solid var(--borda);border-radius:10px;padding:12px;margin:10px 0}
+#modalTermos h2{margin:0;font-size:20px}#modalTermos h3{font-size:15px;margin:12px 0 2px}#modalTermos p{margin:0 0 6px}
+#modalTermos label.aceite{display:flex;gap:8px;align-items:flex-start;color:var(--texto);font-size:14px;margin:0}#modalTermos input[type=checkbox]{width:auto;margin-top:4px}
+footer a{color:var(--cor);cursor:pointer}
+footer{text-align:center;color:var(--suave);font-size:12px;padding:20px}
+</style></head><body>
+<header><div class="marca">📄 DocFácil</div><span style="color:var(--suave);font-size:13px">Grátis · Sem cadastro · Não guardamos seus dados</span></header>
+<main>
+<div id="telaInicial">
+<h1>Contrato, recibo ou orçamento em 1 minuto.</h1>
+<p class="subtitulo">Escolha o documento, conte o que precisa e a IA escreve para você. Sem login.</p>
+<div class="grade" id="listaTipos"></div>
+<div class="anuncio">Espaço para anúncio (banner 728×90 / responsivo)</div>
+</div>
+
+<div id="telaFormulario" class="oculto">
+<button class="btnSecundario" onclick="voltar()">← Voltar</button>
+<h1 id="titulo" style="font-size:28px"></h1>
+<div class="fichas" id="listaProfissoes"></div>
+<div class="caixa">
+<label>Descreva o que você precisa (a IA completa o resto)</label>
+<textarea id="descricao" placeholder="Ex.: Reforma de banheiro de 6m² para a cliente Maria Souza, valor R$ 4.500, metade na entrada e metade na entrega, prazo de 15 dias."></textarea>
+<div class="linha">
+<div><label>Seu nome / empresa</label><input id="empresa"></div>
+<div><label>CNPJ ou CPF (CPF é ocultado automaticamente)</label><input id="docEmitente"></div>
+<div><label>Endereço</label><input id="endereco"></div>
+<div><label>Cliente / contratante</label><input id="cliente"></div>
+<div><label>CPF/CNPJ do cliente (CPF é ocultado)</label><input id="docCliente"></div>
+<div><label>Data de início</label><input id="dataInicio" type="date"></div>
+<div><label>Data de término</label><input id="dataFim" type="date"></div>
+<div><label>Logotipo (opcional)</label><input id="campoLogo" type="file" accept="image/*"></div>
+</div>
+<div class="aviso">🔒 Privacidade: todo CPF vira <b>XXX.XXX.XXX-XX</b> no seu navegador, antes de qualquer envio. Nada é salvo em servidor. Ao fechar a página, tudo some.</div>
+<button class="btnPrincipal" id="btnGerar" onclick="gerar()">Gerar documento</button>
+<span id="status" style="margin-left:10px;color:var(--suave)"></span>
+</div>
+<div id="resultado" class="oculto">
+<div id="documento"></div>
+<div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap"><button class="btnPrincipal" style="margin:0" onclick="baixar()">Baixar</button><button class="btnSecundario" onclick="gerar()">Refazer</button></div>
+<p style="color:var(--suave);font-size:12px">Modelo gerado por IA. Revise antes de usar; para casos complexos, consulte um advogado.</p>
+<div class="anuncio">Espaço para anúncio</div>
+</div>
+</div>
+</main>
+<footer>DocFácil · Documentos gerados por IA não substituem orientação jurídica. · <a onclick="abrirTermos()">Termos de Uso</a></footer>
+<div id="modalTermos" class="oculto" role="dialog" aria-modal="true"><div class="modal">
+<h2>Termos de Uso e Privacidade</h2>
+<div class="termos">
+<h3>1. O que é o DocFácil</h3><p>Ferramenta gratuita que usa inteligência artificial para redigir modelos de contratos, recibos e orçamentos a partir das informações que você digita.</p>
+<h3>2. Não é assessoria jurídica</h3><p>Os documentos são modelos gerados automaticamente e podem conter erros ou omissões. Não substituem advogado, contador ou outro profissional. Revise tudo antes de usar. Você é o único responsável pelo uso que fizer do documento e pelas informações nele contidas.</p>
+<h3>3. Seus dados não ficam guardados</h3><p>Não exigimos cadastro e não armazenamos os textos, documentos, logotipos ou dados que você informa. Eles existem apenas na sua tela durante o uso e desaparecem ao fechar a página.</p>
+<h3>4. CPF</h3><p>Todo CPF digitado é automaticamente substituído por XXX.XXX.XXX-XX no seu navegador antes de qualquer envio. Por isso, o documento sairá com o CPF oculto e você deverá preenchê-lo manualmente. Recomendamos não incluir outros dados sensíveis (senhas, dados bancários completos, documentos de terceiros sem autorização).</p>
+<h3>5. Uso de inteligência artificial</h3><p>O texto que você digita é enviado a um provedor de IA (Anthropic) apenas para gerar a resposta. Não informe dados pessoais de terceiros sem ter autorização para isso.</p>
+<h3>6. Anúncios e cookies</h3><p>O site é mantido por anúncios. Os provedores de publicidade (como o Google AdSense) podem usar cookies para exibir anúncios. Você pode gerenciar cookies nas configurações do seu navegador.</p>
+<h3>7. Uso permitido</h3><p>É proibido usar o site para fraudes, documentos falsos, atividades ilegais, ou tentar sobrecarregar ou burlar o serviço.</p>
+<h3>8. Sem garantias</h3><p>O serviço é oferecido "como está", sem garantia de disponibilidade ou de resultado, e pode ser alterado ou encerrado a qualquer momento. Na máxima extensão permitida pela lei, não nos responsabilizamos por perdas decorrentes do uso dos documentos.</p>
+<h3>9. Lei aplicável</h3><p>Estes termos seguem a legislação brasileira, incluindo a LGPD (Lei 13.709/2018).</p>
+</div>
+<label class="aceite"><input type="checkbox" id="checkAceite" onchange="pegar('btnAceitar').disabled=!this.checked"> Li e concordo com os Termos de Uso e a Política de Privacidade.</label>
+<button class="btnPrincipal" id="btnAceitar" disabled onclick="aceitarTermos()">Aceitar e continuar</button>
+</div></div>
+
+
+<script>
+// ===== Dados fixos =====
+const TIPOS_DOCUMENTO = {
+  contrato:  { nome: "Contrato",  descricao: "Prestação de serviço, aluguel, empreitada…" },
+  recibo:    { nome: "Recibo",    descricao: "Pagamento de serviço ou aluguel" },
+  orcamento: { nome: "Orçamento", descricao: "Proposta de valores para o cliente" },
+};
+const PROFISSOES = ["Pedreiro", "Empreiteiro", "Encanador", "Eletricista", "Advogado", "Contador", "Locador de imóvel", "Locador de salão", "Autônomo / outro"];
+const CAMPOS_FORMULARIO = ["descricao", "empresa", "docEmitente", "endereco", "cliente", "docCliente", "dataInicio", "dataFim"];
+
+// ===== Estado (só na memória da página; nada é salvo) =====
+let tipoEscolhido = "";
+let profissaoEscolhida = "Autônomo / outro";
+let logoBase64 = "";
+let htmlParaDownload = "";
+
+const pegar = (id) => document.getElementById(id);
+
+// ===== Privacidade: todo CPF vira XXX.XXX.XXX-XX =====
+const mascararCpf = (texto) =>
+  texto.replace(/\b\d{3}\.?\d{3}\.?\d{3}-?\d{2}\b/g, "XXX.XXX.XXX-XX");
+
+// ===== Montagem das telas =====
+pegar("listaTipos").innerHTML = Object.entries(TIPOS_DOCUMENTO)
+  .map(([chave, tipo]) => `<button class="cartao" onclick="escolherTipo('${chave}')"><b>${tipo.nome}</b><span>${tipo.descricao}</span></button>`)
+  .join("");
+
+pegar("listaProfissoes").innerHTML = PROFISSOES
+  .map((nome) => `<button class="ficha ${nome === profissaoEscolhida ? "ativo" : ""}" onclick="escolherProfissao(this,'${nome}')">${nome}</button>`)
+  .join("");
+
+function escolherProfissao(botao, nome) {
+  profissaoEscolhida = nome;
+  document.querySelectorAll(".ficha").forEach((f) => f.classList.remove("ativo"));
+  botao.classList.add("ativo");
+}
+
+function escolherTipo(chave) {
+  tipoEscolhido = chave;
+  pegar("titulo").textContent = "Novo " + TIPOS_DOCUMENTO[chave].nome.toLowerCase();
+  pegar("telaInicial").classList.add("oculto");
+  pegar("telaFormulario").classList.remove("oculto");
+  pegar("resultado").classList.add("oculto");
+  scrollTo(0, 0);
+}
+
+function voltar() {
+  pegar("telaFormulario").classList.add("oculto");
+  pegar("telaInicial").classList.remove("oculto");
+}
+
+// ===== Logotipo (fica só no navegador, não é enviado à IA) =====
+pegar("campoLogo").onchange = (evento) => {
+  const arquivo = evento.target.files[0];
+  if (!arquivo) return;
+  const leitor = new FileReader();
+  leitor.onload = () => (logoBase64 = leitor.result);
+  leitor.readAsDataURL(arquivo);
+};
+
+// ===== Gerar documento (chama o SEU servidor, que chama o Claude) =====
+async function gerar() {
+  const dados = {};
+  for (const campo of CAMPOS_FORMULARIO) dados[campo] = mascararCpf(pegar(campo).value.trim());
+
+  if (!dados.descricao) {
+    pegar("status").textContent = "Descreva o que precisa.";
+    return;
+  }
+  pegar("btnGerar").disabled = true;
+  pegar("status").textContent = "Gerando…";
+
+  try {
+    const resposta = await fetch("/api/gerar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: tipoEscolhido, profissao: profissaoEscolhida, dados }),
+    });
+    const json = await resposta.json().catch(() => null);
+    if (!json) throw new Error("O endereço /api/gerar não foi encontrado (erro " + resposta.status + "). A pasta api/gerar.js precisa estar publicada junto com o index.html.");
+    if (!resposta.ok) throw new Error(json.erro || "Falha ao gerar");
+    mostrarDocumento(json.texto);
+    pegar("status").textContent = "";
+  } catch (erro) {
+    const semConexao = erro.message === "Failed to fetch";
+    pegar("status").textContent = semConexao
+      ? (location.protocol === "file:"
+          ? "Erro: você abriu o arquivo direto do computador. Abra pelo endereço do site na Vercel (https://...vercel.app)."
+          : "Erro: não consegui falar com o servidor. Confira se o site e a pasta api estão no mesmo projeto da Vercel.")
+      : "Erro: " + erro.message;
+  }
+  pegar("btnGerar").disabled = false;
+}
+
+function mostrarDocumento(texto) {
+  texto = mascararCpf(texto).replace(/[*#]/g, "");
+  pegar("resultado").classList.remove("oculto");
+  const caixa = pegar("documento");
+  caixa.textContent = texto;
+  if (logoBase64) {
+    const imagem = new Image();
+    imagem.src = logoBase64;
+    caixa.prepend(imagem);
+  }
+  const logoHtml = logoBase64 ? `<img src="${logoBase64}" style="max-height:70px"><br>` : "";
+  htmlParaDownload = `<!DOCTYPE html><meta charset=utf-8><body style="font:15px/1.6 Georgia,serif;max-width:780px;margin:30px auto;white-space:pre-wrap">${logoHtml}${texto.replace(/</g, "&lt;")}</body>`;
+}
+
+function baixar() {
+  const endereco = URL.createObjectURL(new Blob([htmlParaDownload], { type: "text/html" }));
+  const link = document.createElement("a");
+  link.href = endereco;
+  link.download = TIPOS_DOCUMENTO[tipoEscolhido].nome.toLowerCase() + ".html";
+  link.click();
+  URL.revokeObjectURL(endereco);
+}
+
+// ===== Termos de uso (aceite vale só enquanto a aba estiver aberta) =====
+function abrirTermos() {
+  pegar("modalTermos").classList.remove("oculto");
+  pegar("checkAceite").checked = false;
+  pegar("btnAceitar").disabled = true;
+  document.querySelector("main").inert = true;
+}
+
+function aceitarTermos() {
+  pegar("modalTermos").classList.add("oculto");
+  document.querySelector("main").inert = false;
+  try { sessionStorage.setItem("termosAceitos", "1"); } catch (e) {}
+}
+
+addEventListener("load", () => {
+  let jaAceitou = false;
+  try { jaAceitou = sessionStorage.getItem("termosAceitos") === "1"; } catch (e) {}
+  if (!jaAceitou) abrirTermos();
+});
+</script>
+</body></html>
