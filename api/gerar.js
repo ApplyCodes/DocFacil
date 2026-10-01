@@ -53,9 +53,11 @@ module.exports = async (requisicao, resposta) => {
         messages: [{ role: "user", content: `Gere um(a) ${TIPOS[tipo]} para um(a) ${String(profissao).slice(0, 60)}.\nDados: ${JSON.stringify(dadosLimpos)}` }],
       }),
     });
-    if (!chamada.ok) {
-      console.error("Anthropic status", chamada.status); // nunca logue o conteúdo do usuário
-      return resposta.status(502).json({ erro: "Serviço de IA indisponível. Tente de novo." });
+        if (!chamada.ok) {
+      let motivo = "";
+      try { motivo = (await chamada.json())?.error?.message || ""; } catch (e) {}
+      console.error("Anthropic status", chamada.status, motivo);
+      return resposta.status(502).json({ erro: "IA recusou (código " + chamada.status + "): " + motivo.slice(0, 200) });
     }
     const json = await chamada.json();
     const texto = mascararCpf((json.content || []).filter((b) => b.type === "text").map((b) => b.text).join("\n"));
